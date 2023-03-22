@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>video 엘리먼트 mediaStream</title>
+</head>
+<body>
+
+    <!-- 여기서 비디오 파일을 재생하고 -->
+    <video id="videoFile" src="./sample_video.mp4">파일 재생용(컨트롤X)</video>
+    
+    <!-- 여기서 MediaStream을 취득해 재생한다 -->
+    <video id="videoStream" controls>MeidaStream 취득 재생용(컨트롤O)</video>
+    
+    <!-- 이 버튼을 누르면 시작한다 -->
+    <button id="btnStart">시작</button>
+
+</body>
+<script>
+    // <video> 엘리먼트 취득
+    const $videoFile = document.getElementById("videoFile");
+    const $videoStream = document.getElementById("videoStream");
+
+    // <button> 엘리먼트 취득
+    const $button = document.getElementById("btnStart");
+
+    // 버튼 클릭시, 비디오 파일을 재생하고, 스트림을 취득하여 동시 재생한다.
+    $button.onclick = (event)=>{
+        // 비디오 파일 재생: 비디오가 재생 중이어야 스트림이 나온다.
+        $videoFile.play();
+            
+        // 재생 중인 mediaStream 취득
+        const mediaStream = $videoFile.captureStream();
+
+        // 다른 비디오 태그에서 mediaStream을 받아서 동시 재생 처리
+        $videoStream.srcObject = mediaStream;
+        $videoStream.play();
+    }
+
+
+</script>
+</html>

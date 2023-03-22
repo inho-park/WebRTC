@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>canvas MediaStream</title>
+</head>
+<body>
+    <!-- canvas 태그 생성 -->
+    <canvas id="canvas" width="1000" height="300" style="border: 1px solid black;"></canvas>
+    <br><br>
+    
+    <!-- 버튼 생성 -->
+    <button id="btn_start">녹화시작</button>
+    <br><br>
+
+    <!-- 비디오 태그 생성 -->
+    <video id="video" controls style="border: 1px solid black;"></video>
+    
+</body>
+<script>
+    // 버튼, 비디오 태그
+    const $btn_start = document.querySelector("#btn_start");
+    const $video = document.querySelector("#video");
+    
+    // 캔버스 및 그리기 객체
+    const $canvas = document.querySelector("#canvas");
+    const ctx = $canvas.getContext('2d');
+
+    // 버튼 클릭 처리
+    $btn_start.onclick = (event)=>{
+        // 캔버스에 그림 그리기
+        drawCanvas(); 
+
+        // 캔버스 영역 화면을 스트림에 담기
+        const mediaStream = $canvas.captureStream();
+        console.log(mediaStream);
+
+        // 비디오 태그에서 재생
+        $video.srcObject = mediaStream;
+        $video.onloadedmetadata = (event)=>{
+            $video.play();
+        }
+    }
+
+    let rectX = 0;
+    function drawCanvas() {
+        
+        setInterval(() => {
+            ctx.fillRect(rectX, $canvas.height/2, 10, 10);
+            rectX += 20;
+        }, 100);
+    }
+
+
+</script>
+</html>
