@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <!-- 오디오 엘리먼트 -->
+    <audio controls></audio>
+    
+</body>
+
+<script>
+    // audio 엘리먼트 취득
+    const $audio = document.querySelector("audio");
+
+    // 마이크 MediaStream 취득(audio를 true로 설정)
+    navigator.mediaDevices.getUserMedia({audio: true})
+    .then((mediaStream)=>{
+        // Promise이므로 then으로 받아서 사용(async/await를 사용해도 된다.)
+
+        // 마이크에서 입력받은 MediaStream으로 오디오 재생
+        $audio.srcObject = mediaStream;
+        $audio.onloadedmetadata = (event)=>{
+            $audio.play();
+        }
+    })
+    .catch((err)=>{
+        console.error(`에러 발생: ${err}`);
+    });
+</script>
+
+</html>
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime communication with WebRTC</title>
+</head>
+<body>
+  <h1>Realtime communication with WebRTC</h1>
+
+  <audio autoplay playsinline></audio>
+  <script src="js/main2.js"></script>
+</body>
+</html> -->

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <!-- 비디오 엘리먼트 -->
+    <video controls></video>
+    
+</body>
+
+<script>
+    // video 엘리먼트 취득
+    const $video = document.querySelector("video");
+
+    // 카메라 MediaStream 취득(video만 true로 설정)
+    navigator.mediaDevices.getUserMedia({audio: false, video: true})
+    .then((mediaStream)=>{
+        // Promise이므로 then으로 받아서 사용(async/await를 사용해도 된다.)
+
+        // 카메라에서 입력받은 MediaStream으로 영상 재생
+        $video.srcObject = mediaStream;
+        $video.onloadedmetadata = (event)=>{
+            $video.play();
+        }
+    })
+    .catch((err)=>{
+        console.error(`에러 발생: ${err}`);
+    });
+</script>
+</html>
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime communication with WebRTC</title>
+</head>
+<body>
+  <h1>Realtime communication with WebRTC</h1>
+
+  <video autoplay playsinline></video>
+  <script src="js/main3.js"></script>
+</body>
+</html> -->
