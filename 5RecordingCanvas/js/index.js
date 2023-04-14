@@ -1,6 +1,6 @@
     // 요소 가져오기
     const $canvas = document.querySelector("#canvas");
-    const $video = document.querySelector("#video")
+    const $video = document.querySelector("#video");
     const $btn_start = document.querySelector("#btn_start");
     const $btn_stop = document.querySelector("#btn_stop");
     const $video_recorded = document.querySelector("#video_recorded");
@@ -17,21 +17,25 @@
     $btn_start.onclick = (event)=> {
 
         // 캔버스 영역 화면을 스트림으로 취득
-        const mediaStream = $canvas.captureStream();
+        const videoStreamTrack = $canvas.captureStream().getVideoTracks()[0];
         const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
-        const audioStream = new MediaStream();
-        audioStream.addTrack(audioStreamTrack);
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(videoStreamTrack);
+        mediaStream.addTrack(audioStreamTrack);
+        
+        // audio
+        // const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
+        // const audioStream = new MediaStream();
+        // audioStream.addTrack(audioStreamTrack);
 
         // MediaRecorder(녹화) 객체 생성
         mediaRecorder = new MediaRecorder(mediaStream);
-        audioRecorder = new MediaRecorder(audioStream);
 
         // MediaRecorder.dataavailable 이벤트 처리
         mediaRecorder.ondataavailable = (event)=>{
             // 스트림 데이터(Blob)가 들어올 때마다 배열에 담아둔다
             arrVideoData.push(event.data);
         };
-        audioRecorder.ondataavailable = (event) => { arrAudioData.push(event.data)};
 
         // MediaRecorder.stop 이벤트 처리
         mediaRecorder.onstop = (event)=>{
@@ -57,21 +61,8 @@
             arrVideoData.splice(0);
         }
 
-        audioRecorder.onstop = (event) => {
-            const blob = new Blob(arrAudioData);
-
-            const blobURL = window.URL.createObjectURL(blob);
-            const $anchor2 = document.createElement("a");
-            document.body.appendChild($anchor2);
-            $anchor2.style.display = "none";
-            $anchor2.href = blobURL;
-            $anchor2.download = "test.mp3";
-            $anchor2.click();
-        }
-
         // 녹화 시작
-        mediaRecorder.start(); 
-        audioRecorder.start();
+        mediaRecorder.start();
     }
 
 
@@ -88,14 +79,6 @@
 if (navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then( (stream) => { 
-        
-        //마우스 움직임 정보를 담아두는 구간 입니다.
-        const moveArray = [];
-        $canvas.addEventListener('mousemove', function (event) {
-            var x = event.clientX - $canvas.offsetLeft;
-            var y = event.clientY - $canvas.offsetTop;
-            moveArray.push({x, y});
-        }); 
 
         //비디오에 스트림을 넣습니다.
         $video.srcObject = stream
@@ -106,24 +89,12 @@ if (navigator.mediaDevices.getUserMedia) {
 
            setInterval(()=>{
                //초기화
-               ctx.clearRect(0,0,$canvas.width, $canvas.height);
-               ctx.save();
-               ctx.beginPath();
+            //    ctx.clearRect(0,0,$canvas.width, $canvas.height);
+            //    ctx.save();
+            //    ctx.beginPath();
                     
                //비디오 이미지 먼저 그려줍니다.
-               ctx.drawImage($video, 0, 0, $canvas.width, $canvas.height);
-
-               //마우스가 움직인 정보값을 점 찍어 봅니다.
-               moveArray.forEach( (data)=> {
-                   ctx.save();
-                   ctx.beginPath();
-                   ctx.arc(data.x, data.y, 10, (Math.PI / 180) * 0,  (Math.PI / 180) * 360, false);
-                   ctx.fillStyle = 'blue';
-                   ctx.fill();
-                   ctx.closePath();
-                   ctx.restore();                        
-               });
-
+               ctx.drawImage($video, 0, 0, 640, 480);
             },1)
 
         }, false);
