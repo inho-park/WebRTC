@@ -1,79 +1,80 @@
-    // 요소 가져오기
-    const $canvas = document.querySelector("#canvas");
-    const $video = document.querySelector("#video");
-    const $btn_start = document.querySelector("#btn_start");
-    const $btn_stop = document.querySelector("#btn_stop");
-    const $video_recorded = document.querySelector("#video_recorded");
-    const ctx = $canvas.getContext('2d');
+// 요소 가져오기
+const $canvas = document.querySelector("#canvas");
+const $video = document.querySelector("#video");
+const $btn_start = document.querySelector("#btn_start");
+const $btn_stop = document.querySelector("#btn_stop");
+const $video_recorded = document.querySelector("#video_recorded");
+const ctx = $canvas.getContext('2d');
 
-    // MediaRecorder(녹화기) 변수 선언
-    let mediaRecorder = null;
+// MediaRecorder(녹화기) 변수 선언
+let mediaRecorder = null;
 
-    // 스트림 데이터를 담아둘 배열 생성
-    const arrVideoData = [];
-    const arrAudioData = [];
+// 스트림 데이터를 담아둘 배열 생성
+const arrVideoData = [];
+const arrAudioData = [];
 
-    // "녹화시작" 버튼 이벤트 처리
-    $btn_start.onclick = (event)=> {
+// "녹화시작" 버튼 이벤트 처리
+$btn_start.onclick = (event)=> {
 
-        // 캔버스 영역 화면을 스트림으로 취득
-        const videoStreamTrack = $canvas.captureStream().getVideoTracks()[0];
-        const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
-        const mediaStream = new MediaStream();
-        mediaStream.addTrack(videoStreamTrack);
-        mediaStream.addTrack(audioStreamTrack);
+    // 캔버스 영역 화면을 스트림으로 취득
+    const videoStreamTrack = $canvas.captureStream().getVideoTracks()[0];
+    const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
+    console.log($video.captureStream());
+    console.log($video.captureStream().getAudioTracks()[0]);
+    const mediaStream = new MediaStream();
+    mediaStream.addTrack(videoStreamTrack);
+    mediaStream.addTrack(audioStreamTrack);
+    
+    // audio
+    // const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
+    // const audioStream = new MediaStream();
+    // audioStream.addTrack(audioStreamTrack);
+
+    // MediaRecorder(녹화) 객체 생성
+    mediaRecorder = new MediaRecorder(mediaStream);
+
+    // MediaRecorder.dataavailable 이벤트 처리
+    mediaRecorder.ondataavailable = (event)=>{
+        // 스트림 데이터(Blob)가 들어올 때마다 배열에 담아둔다
+        arrVideoData.push(event.data);
+    };
+
+    // MediaRecorder.stop 이벤트 처리
+    mediaRecorder.onstop = (event)=>{
+        // 들어온 스트림 데이터들(Blob)을 통합한 Blob객체를 생성
+        const blob = new Blob(arrVideoData);
+
+        // BlobURL 생성: 통합한 스트림 데이터를 가르키는 임시 주소를 생성
+        const blobURL = window.URL.createObjectURL(blob);
+        console.log(blobURL);
+        // 재생 구현
+        $video_recorded.src = blobURL;
+        $video_recorded.play();
+
+        // 다운로드 구현
+        const $anchor = document.createElement("a"); // 앵커 태그 생성
+        document.body.appendChild($anchor);
+        $anchor.style.display = "none";
+        $anchor.href = blobURL; // 다운로드 경로 설정
+        $anchor.download = "test.webm"; // 파일명 설정
+        $anchor.click(); // 앵커 클릭
         
-        // audio
-        // const audioStreamTrack = $video.captureStream().getAudioTracks()[0];
-        // const audioStream = new MediaStream();
-        // audioStream.addTrack(audioStreamTrack);
-
-        // MediaRecorder(녹화) 객체 생성
-        mediaRecorder = new MediaRecorder(mediaStream);
-
-        // MediaRecorder.dataavailable 이벤트 처리
-        mediaRecorder.ondataavailable = (event)=>{
-            // 스트림 데이터(Blob)가 들어올 때마다 배열에 담아둔다
-            arrVideoData.push(event.data);
-        };
-
-        // MediaRecorder.stop 이벤트 처리
-        mediaRecorder.onstop = (event)=>{
-            // 들어온 스트림 데이터들(Blob)을 통합한 Blob객체를 생성
-            const blob = new Blob(arrVideoData);
-
-            // BlobURL 생성: 통합한 스트림 데이터를 가르키는 임시 주소를 생성
-            const blobURL = window.URL.createObjectURL(blob);
-            console.log(blobURL);
-            // 재생 구현
-            $video_recorded.src = blobURL;
-            $video_recorded.play();
-
-            // 다운로드 구현
-            const $anchor = document.createElement("a"); // 앵커 태그 생성
-            document.body.appendChild($anchor);
-            $anchor.style.display = "none";
-            $anchor.href = blobURL; // 다운로드 경로 설정
-            $anchor.download = "test.webm"; // 파일명 설정
-            $anchor.click(); // 앵커 클릭
-            
-            // 배열 초기화
-            arrVideoData.splice(0);
-        }
-
-        // 녹화 시작
-        mediaRecorder.start();
+        // 배열 초기화
+        arrVideoData.splice(0);
     }
 
+    // 녹화 시작
+    mediaRecorder.start();
+}
 
-    // "녹화종료" 버튼 이벤트 처리
-    $btn_stop.onclick = (event)=>{
 
-        // 녹화 중단!
-        mediaRecorder.stop(); 
-        audioRecorder.stop();
-    }
+// "녹화종료" 버튼 이벤트 처리
+$btn_stop.onclick = (event)=>{
 
+    // 녹화 중단!
+    mediaRecorder.stop(); 
+    audioRecorder.stop();
+}
 
 
 if (navigator.mediaDevices.getUserMedia) {
